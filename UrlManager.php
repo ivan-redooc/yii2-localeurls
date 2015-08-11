@@ -190,6 +190,7 @@ class UrlManager extends BaseUrlManager
             if (!$languageRequired && !$this->enableDefaultLanguageUrlCode && $language===$this->getDefaultLanguage()) {
                 return  $url;
             } else {
+                $url = rtrim($url, '/');
                 $key = array_search($language, $this->languages);
                 $base = $this->showScriptName ? $this->getScriptUrl() : $this->getBaseUrl();
                 $length = strlen($base);
@@ -366,6 +367,8 @@ class UrlManager extends BaseUrlManager
         $redirectUrl = $this->createUrl($redirectRoute);
         Yii::$app->getResponse()->redirect($redirectUrl);
         if (YII_ENV_TEST) {
+            // Response::redirect($url) above will call `Url::to()` internally. So to really
+            // test for the same final redirect URL here, we need to call Url::to(), too.
             throw new \yii\base\Exception(\yii\helpers\Url::to($redirectUrl));
         } else {
             Yii::$app->end();
