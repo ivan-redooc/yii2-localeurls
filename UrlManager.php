@@ -350,18 +350,20 @@ class UrlManager extends BaseUrlManager
     /**
      * Redirect to the current URL with given language code applied
      *
-     * @param string $language for back compatibility.
+     * @param string $language the language code to add. Can also be empty to not add any language code.
      */
     protected function redirectToLanguage($language)
     {
         $result = parent::parseRequest($this->_request);
-        if ($result !== false) {
-            list ($route, $params) = $result;
-            $_route = [$route] + $params + $_GET;
-        } else {
+        if ($result === false) {
             throw new \yii\web\NotFoundHttpException(Yii::t('yii', 'Page not found.'));
         }
-        $redirectUrl = $this->createUrl($_route);
+        list ($route, $params) = $result;
+        if($language){
+            $params[$this->languageParam]=$language;
+        }
+        $redirectRoute = [$route] + $params + $_GET;
+        $redirectUrl = $this->createUrl($redirectRoute);
         Yii::$app->getResponse()->redirect($redirectUrl);
         if (YII_ENV_TEST) {
             throw new \yii\base\Exception(\yii\helpers\Url::to($redirectUrl));
