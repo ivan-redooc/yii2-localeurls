@@ -350,56 +350,18 @@ class UrlManager extends BaseUrlManager
     /**
      * Redirect to the current URL with given language code applied
      *
-     * @param string $language the language code to add. Can also be empty to not add any language code.
+     * @param string $language for back compatibility.
      */
     protected function redirectToLanguage($language)
     {
-        // Examples:
-        // 1) /baseurl/index.php/some/page?q=foo
-        // 2) /baseurl/some/page?q=foo
-        // 3)
-        // 4) /some/page?q=foo
-
-        if ($this->showScriptName) {
-            // 1) /baseurl/index.php
-            // 2) /baseurl/index.php
-            // 3) /index.php
-            // 4) /index.php
-            $redirectUrl = $this->_request->getScriptUrl();
+        $result = parent::parseRequest($this->_request);
+        if ($result !== false) {
+            list ($route, $params) = $result;
+            $_route = [$route] + $params + $_GET;
         } else {
-            // 1) /baseurl
-            // 2) /baseurl
-            // 3)
-            // 4)
-            $redirectUrl = $this->_request->getBaseUrl();
+            throw new \yii\web\NotFoundHttpException(Yii::t('yii', 'Page not found.'));
         }
-
-        if ($language) {
-            $redirectUrl .= '/'.$language;
-        }
-
-        // 1) some/page
-        // 2) some/page
-        // 3)
-        // 4) some/page
-        $pathInfo = $this->_request->getPathInfo();
-        if ($pathInfo) {
-            $redirectUrl .= '/'.$pathInfo;
-        }
-
-        if ($redirectUrl === '') {
-            $redirectUrl = '/';
-        }
-
-        // 1) q=foo
-        // 2) q=foo
-        // 3)
-        // 4) q=foo
-        $queryString = $this->_request->getQueryString();
-        if ($queryString) {
-            $redirectUrl .= '?'.$queryString;
-        }
-
+        $redirectUrl = $this->createUrl($_route);
         Yii::$app->getResponse()->redirect($redirectUrl);
         if (YII_ENV_TEST) {
             throw new \yii\base\Exception(\yii\helpers\Url::to($redirectUrl));
