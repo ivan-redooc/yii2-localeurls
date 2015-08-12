@@ -363,15 +363,16 @@ class UrlManager extends BaseUrlManager
         if($language){
             $params[$this->languageParam]=$language;
         }
-        $redirectRoute = [$route] + $params + $_GET;
-        $redirectUrl = $this->createUrl($redirectRoute);
-        Yii::$app->getResponse()->redirect($redirectUrl);
+        array_unshift($params, $route);
+        $url = $this->createUrl($params);
+        Yii::$app->getResponse()->redirect($url);
         if (YII_ENV_TEST) {
             // Response::redirect($url) above will call `Url::to()` internally. So to really
             // test for the same final redirect URL here, we need to call Url::to(), too.
-            throw new \yii\base\Exception(\yii\helpers\Url::to($redirectUrl));
+            throw new \yii\base\Exception(\yii\helpers\Url::to($url));
         } else {
             Yii::$app->end();
         }
+
     }
 }
